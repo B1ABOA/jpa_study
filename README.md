@@ -147,3 +147,129 @@ public class Emp {
 ### 🎱 문제입니다!:
 <img src="https://github.com/user-attachments/assets/e6831267-e428-435f-966b-33f7043ccf1f" width="600"> <br />
 1. 현재 Dept객체로 Select시 위와 같은 에러가 발생하는데 왜 나는것일까요??
+
+
+
+
+### Issue
+## 무한참조 Issue
+- Import 문은 제외하였습니다.
+### Dept.java
+```java
+package model.domain.entity;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@RequiredArgsConstructor
+@Getter
+@Setter
+@ToString
+
+@Table(name = "dept")
+@Entity
+public class Dept {
+	
+	@Id
+	@Column(name = "deptno")
+	private long deptno;
+	
+	@NonNull
+	private String dname;
+	
+	@NonNull
+	private String loc;
+	
+	@OneToMany(mappedBy = "deptno")
+	private List<Emp> emps = new ArrayList<>();
+
+}
+```
+### Emp.java
+```java
+package model.domain.entity;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@RequiredArgsConstructor
+@Getter
+@Setter
+@ToString
+
+@Table(name = "emp")
+@Entity
+public class Emp {
+	@Id
+	@Column(name = "empno")
+	private long empno;
+	
+	@NonNull
+	private String ename;
+	
+	@NonNull
+	private String job;
+	
+	@NonNull
+	private int mgr;
+
+	@NonNull
+	private Date hiredate;
+	
+	@NonNull
+	private int sal;
+	
+	private int comm;
+	
+	@OneToOne
+	@JoinColumn(name="deptno")
+	private Dept deptno;
+}
+
+```
+### RunningTest.java
+```
+public class RunningTest {
+	
+	@Test
+	public void stpe01Test() {
+		EntityManager em = DBUtil.getEntityManager();
+		Emp emp = em.find(Emp.class, 7782L);
+		System.out.println("사원 아이디가 7782 사람 : " + emp.getEname());
+		System.out.println("사원 아이디가 7782 사람 : " + emp.getEname() + " / 부서명 :  " + emp.getDeptno().getDeptno());
+		System.out.println("사원 아이디가 7782 사람 : " + emp.getDeptno());
+
+		
+		Dept dept = em.find(Dept.class, 10L);
+		System.out.println("부서 아이디가 10인 부사 : " + dept.getDname());
+		
+		List<Emp> emps = dept.getEmps();
+		emps.forEach(System.out::println);
+		
+		em = null;
+		
+	}
+
+}
+```
+### Trouble 💣
+#### - RunningTest.java 에서 System.out.println 으로 Deptno를 출력하고자 하면 Stackoverflow error가 발생합니다. 왜일까요?
+> 순환 참조 </br>
+> 원인 : ToString으로 인해 발생하게 되는 에러입니다.</br>
+1. Emp 객체와 Dept 객체가 있습니다. </br>
+2. Emp 객체는 Dept 객체를 참조합니다 (emp.getDeptno()).</br>
+3. Dept 객체도 여러 Emp 객체들을 리스트로 참조합니다 (dept.getEmps()).</br>
+
+즉, Emp 객체가 Dept 객체를 포함하고, Dept 객체가 다시 여러 Emp 객체들을 포함하는 구조입니다.</br>
+emp.toString()이 호출되면 Dept 객체의 toString()이 호출되고, 이 Dept 객체의 toString()은 다시 그 안에 포함된 여러 Emp 객체들의 toString()을 호출하게 됩니다.</br>
+
+쉽게 표현하자면 </br>
+emp.toString() -> dept.toString() -> emps.toString() -> 다시 emp.toString()으로 무한히 순환하면서 호출됩니다.</br>
+이로 인해 StackOverflowError와 같은 에러가 발생하게 되는 것입니다.</br>
+
+### Solution
+두 클래스파일 중 한 곳에 ToString(exclude = )로 순환참조가 발생하게되는 멤버변수를 제외시켜줍시다.
+예를 들자면 Dept 클래스에서 해결해주고자 한다면 
+> @ToString(exclude = "emps") </br>
+
+위와 같이 순환 참조가 발생하게 되는 emps를 제외시켜주면 됩니다.
+
+
