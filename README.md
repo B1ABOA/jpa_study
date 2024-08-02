@@ -39,20 +39,9 @@
 
 ## 예제
 
-### 🎁 아래는 Dept 엔티티 클래스를 사용하는 JPQL 쿼리의 예입니다:
+### 🎁 `Dept` 엔티티는 다음과 같이 정의되어 있다고 가정합니다:
 
 ```java
-
-List<Dept> datas = em.createQuery("select d from Dept d", Dept.class).getResultList();
-
-```
-
-<br>
-
-### 🎁 : 이 JPQL 쿼리는 `Dept` 엔티티의 모든 레코드를 가져오는 코드입니다. `Dept` 엔티티는 다음과 같이 정의되어 있다고 가정합니다:
-
-```java
-
 @Entity
 public class Dept {
     @Id
@@ -63,11 +52,17 @@ public class Dept {
 
     // Getters and Setters
 }
+```
 
+### 🎁 아래는 Dept 엔티티 클래스를 사용하여 `Dept` 엔티티의 모든 레코드를 가져오는 JPQL 쿼리의 예입니다:
+
+```java
+List<Dept> datas = em.createQuery("select d from Dept d", Dept.class).getResultList();
 ```
 
 <br>
-🎱 문제입니다!:
+
+### 🎱 문제입니다!:
 
 1. **JPQL 쿼리에서 `Dept.class`를 사용하여 `Dept` 타입으로 결과를 가져오는 이유는 무엇인가요?**
 2. **위의 JPQL 쿼리를 사용하여 `Dept` 엔티티의 `name` 필드가 "Sales"인 모든 `Dept` 객체를 조회하려면 쿼리를 어떻게 수정해야 하나요?**
@@ -79,9 +74,7 @@ public class Dept {
 2. name 필드가 "Sales"인 Dept 객체를 조회하는 JPQL 쿼리 수정:
 
 ```java
-
 List<Dept> datas = em.createQuery("select d from Dept d where d.name = :name", Dept.class)
                     .setParameter("name", "Sales")
                     .getResultList();
-
 ```
