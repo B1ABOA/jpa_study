@@ -1,4 +1,4 @@
-# jpa_study1
+# jpa_study
 
 
 ## 👩‍💻 팀원 소개
@@ -37,7 +37,7 @@
 
 <br>
 
-## 예제
+## 예제1
 
 ### 🎁 `Dept` 엔티티는 다음과 같이 정의되어 있다고 가정합니다:
 
@@ -78,3 +78,72 @@ List<Dept> datas = em.createQuery("select d from Dept d where d.name = :name", D
                     .setParameter("name", "Sales")
                     .getResultList();
 ```
+
+## 예제2
+
+### 🎁 아래는 Emp 엔티티 클래스와 Emp 테이블에 있는 데이터 입니다.
+```java
+package model.domain.entity;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@RequiredArgsConstructor
+@Getter
+@Setter
+//@ToString
+
+@Table(name = "emp")
+@Entity
+public class Emp {
+	@Id
+	@Column(name = "empno")
+	private long empno;
+	
+	@NonNull
+	private String ename;
+	
+	@NonNull
+	private String job;
+	
+	@NonNull
+	private int mgr;
+
+	@NonNull
+	private Date hiredate;
+	
+	@NonNull
+	private int sal;
+	
+	private int comm;
+	
+	@OneToOne
+	@JoinColumn(name="deptno")
+	private Dept deptno;
+}
+
+```
+## Dept Table
+<img src="https://github.com/user-attachments/assets/d7c78897-ded1-4d39-91e2-80a504c106bb">
+
+<br>
+
+### 🎱 문제입니다!:
+<img src="https://github.com/user-attachments/assets/e6831267-e428-435f-966b-33f7043ccf1f" width="600"> <br />
+1. 현재 Dept객체로 Select시 위와 같은 에러가 발생하는데 왜 나는것일까요??
